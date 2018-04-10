@@ -1,0 +1,67 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: conjur-ee
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: regcred
+  namespace: conjur-ee
+data:
+  .dockerconfigjson: eyJhdXRocyI6eyJyZWdpc3RyeTIuaXRjaS5jb25qdXIubmV0Ijp7InVzZXJuYW1lIjoiZGFycmVuLmtoYW4iLCJwYXNzd29yZCI6IjNlemF6M3dldDczcHczOXk4dGJiM3M0ZHg5bXZ5dHo1MHk5dmU3ODJwemZmNDExZnBmNXE2IiwiZW1haWwiOiJkYXJyZW4ua2hhbkBjeWJlcmFyay5jb20iLCJhdXRoIjoiWkdGeWNtVnVMbXRvWVc0Nk0yVjZZWG96ZDJWME56Tndkek01ZVRoMFltSXpjelJrZURsdGRubDBlalV3ZVRsMlpUYzRNbkI2Wm1ZME1URm1jR1kxY1RZPSJ9fX0=
+type: kubernetes.io/dockerconfigjson
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: conjur-enterprise
+  namespace: conjur-ee
+  labels:
+    app: conjur
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: conjur
+  template:
+    metadata:
+      labels:
+        app: conjur
+    spec:
+      containers:
+      - name: conjur-master
+        imagePullPolicy: Always
+        image: registry2.itci.conjur.net/conjur-appliance:4.9.16.0
+        ports:
+          - containerPort: 443
+            protocol: TCP
+          - containerPort: 636
+            protocol: TCP
+          - containerPort: 5432
+            protocol: TCP
+          - containerPort: 5433
+            protocol: TCP
+      - name: conjur-cli
+        imagePullPolicy: Always
+        image: captainfluffytoes/docker_conjur_cli
+      imagePullSecrets:
+      - name: regcred
+      
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: conjur-master
+  namespace: conjur-ee
+spec:
+  ports:
+  - name: https
+    port: 443
+    targetPort: 443
+  selector:
+    app: conjur
+  type: NodePort
