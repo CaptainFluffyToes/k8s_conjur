@@ -8,7 +8,7 @@ metadata:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: conjur-enterprise
+  name: conjur-master
   namespace: conjur-ee
   labels:
     app: conjur
@@ -16,15 +16,17 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: conjur
+      app: conjur-node
+      role: master
   template:
     metadata:
       labels:
-        app: conjur
+        app: conjur-node
+        role: master
     spec:
       containers:
       - name: conjur-master
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         image: registry2.itci.conjur.net/conjur-appliance:4.9.16.0
         ports:
           - containerPort: 443
@@ -35,12 +37,68 @@ spec:
             protocol: TCP
           - containerPort: 5433
             protocol: TCP
-      - name: conjur-cli
-        imagePullPolicy: IfNotPresent
-        image: captainfluffytoes/docker_conjur_cli
+      imagePullSecrets:
+      - name: regcred
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: conjur-follower
+  namespace: conjur-ee
+  labels:
+    app: conjur
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: conjur-follower
+      role: follower
+  template:
+    metadata:
+      labels:
+        app: conjur-follower
+        role: follower
+    spec:
+      containers:
+      - name: conjur-follower
+        imagePullPolicy: Always
+        image: registry2.itci.conjur.net/conjur-appliance:4.9.16.0
+        ports:
+          - containerPort: 443
+            protocol: TCP
+          - containerPort: 636
+            protocol: TCP
+          - containerPort: 5432
+            protocol: TCP
+          - containerPort: 5433
+            protocol: TCP
       imagePullSecrets:
       - name: regcred
       
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: conjur-cli
+  namespace: conjur-ee
+  labels:
+    app: conjur
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: conjur-cli
+  template:
+    metadata:
+      labels:
+        app: conjur-cli
+    spec:
+      containers:
+      - name: conjur-cli
+        imagePullPolicy: Always
+        image: captainfluffytoes/docker_conjur_cli
+
 ---
 apiVersion: v1
 kind: Service
@@ -52,6 +110,33 @@ spec:
   - name: https
     port: 443
     targetPort: 443
+  - name: postgres1
+    port: 5432
+    targetPort: 5432
+  - name: postgres2
+    port: 5433
+    targetPort: 5433
   selector:
-    app: conjur
+    role: master
+  type: NodePort
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: conjur-follower
+  namespace: conjur-ee
+spec:
+  ports:
+  - name: https
+    port: 443
+    targetPort: 443
+  - name: postgres1
+    port: 5432
+    targetPort: 5432
+  - name: postgres2
+    port: 5433
+    targetPort: 5433
+  selector:
+    app: conjur-follower
   type: NodePort
