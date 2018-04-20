@@ -52,7 +52,7 @@ metadata:
   labels:
     app: conjur
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: conjur-follower
