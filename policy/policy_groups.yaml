@@ -11,4 +11,4 @@
 
 - !grant
   role: !group admins
-  member: !user darren
+  member: !user dkhan

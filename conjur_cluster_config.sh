@@ -31,7 +31,10 @@ main()
 	authnk8s_config
 	printf "\nSetting up Conjur CLI."
 	cli_config
-	print "\nConjur Cluster has finished!"
+	printf "\nConjur Cluster has finished!\n"
+	printf "\n----"
+	printf "\nLoading Policies!"
+	policy_load
 }
 
 master_config()
@@ -151,4 +154,24 @@ EOF
 	rm conjur-$CONJUR_ACCOUNT.pem
 }
 
-main
+policy_load(){
+	printf "\nGetting CLI pod names."	
+	local cli_pod_names=$(kubectl get pods -n $NAMESPACE -l app=conjur-node,role=cli --no-headers | awk '{print $1;}')
+	
+	for pod in $cli_pod_names; do
+		printf "\nWorking on Pod:$pod\n"
+		printf "Finding Containers within Pod: $pod\n"		
+		local cli_container_name=$(kubectl -n $NAMESPACE get pods $pod -o jsonpath='{.spec.containers[*].name}')
+		for container in $cli_container_name; do
+			printf "Working on container: $container in pod: $pod\n"
+			printf "Copying policy directory into container.\n"
+			kubectl cp policy $NAMESPACE/$pod:/root/policy -c $container
+			printf "Copying interaction scripts.\n"
+			kubectl cp api_interaction $NAMESPACE/$pod:/root/api_interaction -c $container
+			kubectl -n $NAMESPACE exec $pod -c $container -i -t -- conjur policy load --as-group security_admin /root/policy/policy_lab.yaml
+			printf "Policies Loaded\n"		
+		done
+	done
+}
+
+policy_load

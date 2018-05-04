@@ -1,0 +1,4 @@
+---
+- !policy
+  id: authnk8s
+  body:

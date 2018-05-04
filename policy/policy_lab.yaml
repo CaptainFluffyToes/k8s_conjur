@@ -7,3 +7,4 @@
   owner: !group admins
   body:
   - !include policy_nginx.yaml
+  - !include policy_authnk8s.yaml
