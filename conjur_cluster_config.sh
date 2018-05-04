@@ -37,7 +37,7 @@ main()
 master_config()
 {
 	printf "Configuring Master Instance.\n"
-	kubectl -n $NAMESPACE exec $master_pod_name -c $master_container_name -i -t -- evoke configure master -h $MASTER_SERVICE_NAME -p $ADMIN_PASSWORD $CONJUR_ACCOUNT &> /dev/null
+	kubectl -n $NAMESPACE exec $master_pod_name -c $master_container_name -i -t -- evoke configure master -h $MASTER_URL -p $ADMIN_PASSWORD $CONJUR_ACCOUNT &> /dev/null
 	printf "Master instance has been configured.\n"
 }
 
@@ -72,7 +72,7 @@ follower_config()
 	printf "\nGetting Follwer pod names.\n"
 	local follower_pod_names=$(kubectl get pods -n $NAMESPACE -l app=conjur-node,role=follower --no-headers | awk '{print $1;}')
 	printf "Generating follower SEED package.\n"
-	kubectl -n $NAMESPACE exec $master_pod_name -c $master_container_name -- evoke ca issue --force $FOLLOWER_URL
+	kubectl -n $NAMESPACE exec $master_pod_name -c $master_container_name -- evoke ca issue --force $FOLLOWER_URL &> /dev/null
 	kubectl -n $NAMESPACE exec $master_pod_name -c $master_container_name evoke seed follower $FOLLOWER_URL $MASTER_URL > follower.tar
 	
 	for pod in $follower_pod_names; do
@@ -84,9 +84,9 @@ follower_config()
 			printf "Copying seed package into container: $container\n"
 			kubectl cp follower.tar $NAMESPACE/$pod:/follower.tar -c $container
 			printf "Unpacking and importing follower seed package.\n"
-			kubectl -n $NAMESPACE exec $pod -c $name evoke unpack seed /follower.tar &> /dev/null
+			kubectl -n $NAMESPACE exec $pod -c $container evoke unpack seed /follower.tar &> /dev/null
 			printf "Configuring follower server.\n"
-			kubectl -n $NAMESPACE exec $pod -c $name evoke configure follower &> /dev/null
+			kubectl -n $NAMESPACE exec $pod -c $container evoke configure follower &> /dev/null
 			printf "Follower server configured!\n"		
 		done
 	done
@@ -95,14 +95,14 @@ follower_config()
 
 authnk8s_config()
 {
-	printf "\nGetting Authnk8s pod names."
+	printf "\nGetting Authnk8s pod names.\n"
 	local authnk8s_pod_names=$(kubectl get pods -n $NAMESPACE -l app=conjur-node,role=authnk8s --no-headers | awk '{print $1;}')
 	printf "Generating authnk8s SEED package.\n"
-	kubectl -n $NAMESPACE exec $master_pod_name -c $master_container_name -- evoke ca issue --force $AUTHNK8S_URL
+	kubectl -n $NAMESPACE exec $master_pod_name -c $master_container_name -- evoke ca issue --force $AUTHNK8S_URL &> /dev/null
 	kubectl -n $NAMESPACE exec $master_pod_name -c $master_container_name evoke seed follower $AUTHNK8S_URL $MASTER_URL > authnk8s.tar
 	
 	for pod in $authnk8s_pod_names; do
-		printf "\nWorking on Pod:$pod\n"
+		printf "Working on Pod:$pod\n"
 		printf "Finding Containers within Pod: $pod\n"		
 		local authnk8s_container_name=$(kubectl -n $NAMESPACE get pods $pod -o jsonpath='{.spec.containers[*].name}')
 		for container in $authnk8s_container_name; do
@@ -110,9 +110,9 @@ authnk8s_config()
 			printf "Copying seed package into container: $container\n"
 			kubectl cp authnk8s.tar $NAMESPACE/$pod:/authnk8s.tar -c $container
 			printf "Unpacking and importing authnk8s seed package.\n"
-			kubectl -n $NAMESPACE exec $pod -c $name evoke unpack seed /authnk8s.tar &> /dev/null
+			kubectl -n $NAMESPACE exec $pod -c $container evoke unpack seed /authnk8s.tar &> /dev/null
 			printf "Configuring authnk8s server.\n"
-			kubectl -n $NAMESPACE exec $pod -c $name evoke configure follower &> /dev/null
+			kubectl -n $NAMESPACE exec $pod -c $container evoke configure follower &> /dev/null
 			printf "Authnk8s server configured!\n"		
 		done
 	done
@@ -144,10 +144,11 @@ EOF
 			kubectl cp conjur-$CONJUR_ACCOUNT.pem $NAMESPACE/$pod:/root/conjur-$CONJUR_ACCOUNT.pem -c $container
 			kubectl cp conjurrc $NAMESPACE/$pod:/root/.conjurrc -c $container
 			kubectl -n $NAMESPACE exec $pod -c $container -i -t -- conjur authn login -u admin -p $ADMIN_PASSWORD
-			printf "CLI  configured!\n"		
+			printf "CLI configured!\n"		
 		done
 	done
 	rm conjur-$CONJUR_ACCOUNT.pem
 	rm conjurrc
 }
+
 main
