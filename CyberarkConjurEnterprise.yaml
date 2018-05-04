@@ -27,7 +27,7 @@ spec:
       containers:
       - name: master
         imagePullPolicy: Always
-        image: registry2.itci.conjur.net/conjur-appliance:4.9.16.0
+        image: registry2.itci.conjur.net/conjur-appliance:4.9.18.0
         ports:
           - containerPort: 443
             protocol: TCP
@@ -88,7 +88,7 @@ spec:
       containers:
       - name: standby
         imagePullPolicy: Always
-        image: registry2.itci.conjur.net/conjur-appliance:4.9.16.0
+        image: registry2.itci.conjur.net/conjur-appliance:4.9.18.0
         ports:
           - containerPort: 443
             protocol: TCP
@@ -124,7 +124,7 @@ spec:
       containers:
       - name: follower
         imagePullPolicy: Always
-        image: registry2.itci.conjur.net/conjur-appliance:4.9.16.0
+        image: registry2.itci.conjur.net/conjur-appliance:4.9.18.0
         ports:
           - containerPort: 443
             protocol: TCP
@@ -160,7 +160,7 @@ spec:
       containers:
       - name: follower
         imagePullPolicy: Always
-        image: registry2.itci.conjur.net/conjur-appliance:4.9.16.0
+        image: registry2.itci.conjur.net/conjur-appliance:4.9.18.0
         env:
           - name: CONJUR_AUTHENTICATORS
             value: authn-k8s/prod

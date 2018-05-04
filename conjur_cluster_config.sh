@@ -147,8 +147,8 @@ EOF
 			printf "CLI configured!\n"		
 		done
 	done
+	printf "Removing certificate.\n"
 	rm conjur-$CONJUR_ACCOUNT.pem
-	rm conjurrc
 }
 
 main
