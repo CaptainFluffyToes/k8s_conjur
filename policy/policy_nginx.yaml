@@ -1,0 +1,23 @@
+---
+- !policy
+  id: nginx
+  body:
+  - &variables
+    - !variable lab_password
+
+  - !layer nginxhosts
+
+  - !host nginx1
+
+  - !grant
+    role: !layer nginxhosts
+    member: !host nginx1
+
+  - !permit
+    role: !layer nginxhosts
+    privileges: [ read, execute ]
+    resource: *variables
+
+  - !host-factory
+    id: nginx_factory
+    layers: [ !layer nginxhosts]

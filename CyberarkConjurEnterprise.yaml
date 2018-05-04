@@ -37,12 +37,34 @@ spec:
             protocol: TCP
           - containerPort: 5433
             protocol: TCP
-      - name: cli
-        imagePullPolicy: Always
-        image: captainfluffytoes/docker_conjur_cli
       imagePullSecrets:
       - name: regcred
 
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cli
+  namespace: cyberark-conjur-enterprise
+  labels:
+    app: conjur
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: conjur-node
+      role: cli
+  template:
+    metadata:
+      labels:
+        app: conjur-node
+        role: cli
+    spec:
+      containers:
+      - name: cli
+        imagePullPolicy: Always
+        image: captainfluffytoes/docker_conjur_cli
+      
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -52,7 +74,7 @@ metadata:
   labels:
     app: conjur
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: conjur-node

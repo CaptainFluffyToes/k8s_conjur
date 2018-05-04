@@ -1,0 +1,14 @@
+---
+- !group
+  id: devops
+  
+- !group 
+  id: admins
+
+- !grant
+  role: !group devops
+  member: !group admins
+
+- !grant
+  role: !group admins
+  member: !user darren

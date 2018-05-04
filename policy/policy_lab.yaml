@@ -1,0 +1,9 @@
+---
+- !include policy_users.yaml
+- !include policy_groups.yaml
+
+- !policy
+  id: Lab
+  owner: !group admins
+  body:
+  - !include policy_nginx.yaml
