@@ -151,7 +151,9 @@ EOF
 		done
 	done
 	printf "Removing certificate.\n"
-	rm conjur-$CONJUR_ACCOUNT.pem
+	rm -f conjur-$CONJUR_ACCOUNT.pem
+	printf "Removing configuration file.\n"
+	rm -f conjurrc
 }
 
 policy_load(){
@@ -174,4 +176,4 @@ policy_load(){
 	done
 }
 
-policy_load
+main
