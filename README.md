@@ -16,7 +16,7 @@ This will stand up a CyberArk Conjur Enterprise cluster in Kubernetes.  It can a
 ## How to use
 
 1. Clone Repo into machine with a configured kubectl
-2. Create secret in namespace "cyberark-conjur-enterprise" that logs into the private conjur docker registry
+2. Create secret in namespace "cyberark-conjur-enterprise" named "regcred" that logs into the private conjur docker registry
 3. Execute ./1_conjur_configuration.sh
 4. Execute ./2_cli_configuration.sh
 5. Execute ./3_authnk8s_configuration.sh (only if you want to test out the integration)
