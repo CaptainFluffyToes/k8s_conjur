@@ -1,5 +1,5 @@
 # CyberArk Conjur Enterprise Kubernetes Deployment
-This will stand up a CyberArk Conjur Enterprise cluster in Kubernetes.  
+This will stand up a CyberArk Conjur Enterprise cluster in Kubernetes.  It can also expand the cluster to include Conjur integrated into kubernets for multi-factor verification of pod characteristics  
 
 ## Containers that comprise the cluster
 * CyberArk Conjur Master
@@ -16,9 +16,9 @@ This will stand up a CyberArk Conjur Enterprise cluster in Kubernetes.
 ## How to use
 
 1. Clone Repo into machine with a configured kubectl
-2. Run "kubectl apply -f CyberArkConjurEnterprise.yml"
-3. Check for the new Pod's readiness
-4. Modify policies contained in the Policies folder to include new parameters if desired.  These policies will be automatically uploaded to Conjur.
-5. Execute conjur_cluster_config.sh
+2. Create secret in namespace "cyberark-conjur-enterprise" that logs into the private conjur docker registry
+3. Execute ./1_conjur_configuration.sh
+4. Execute ./2_cli_configuration.sh
+5. Execute ./3_authnk8s_configuration.sh (only if you want to test out the integration)
 
-You will be dropped at the CLI of the conjur CLI container which will allow you to use the script(s) in the api_interaction folder as well as communicate with conjur using the pre-installed and configured conjur cli components. 
+This will create a fully working cluster with a logged in and configured CLI pod.

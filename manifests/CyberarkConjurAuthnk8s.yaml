@@ -1,0 +1,65 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cyberark-conjur-enterprise
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authnk8s
+  namespace: cyberark-conjur-enterprise
+  labels:
+    app: conjur
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: conjur-node
+      role: authnk8s
+  template:
+    metadata:
+      labels:
+        app: conjur-node
+        role: authnk8s
+    spec:
+      containers:
+      - name: follower
+        imagePullPolicy: Always
+        image: registry2.itci.conjur.net/conjur-appliance:4.9.18.0
+        env:
+          - name: CONJUR_AUTHENTICATORS
+            value: authn-k8s/prod
+        ports:
+          - containerPort: 443
+            protocol: TCP
+          - containerPort: 636
+            protocol: TCP
+          - containerPort: 5432
+            protocol: TCP
+          - containerPort: 5433
+            protocol: TCP
+      imagePullSecrets:
+      - name: regcred
+      
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: conjur-authnk8s
+  namespace: cyberark-conjur-enterprise
+spec:
+  ports:
+  - name: https
+    port: 443
+    targetPort: 443
+  - name: postgres1
+    port: 5432
+    targetPort: 5432
+  - name: postgres2
+    port: 5433
+    targetPort: 5433
+  selector:
+    role: authnk8s
+  type: NodePort
