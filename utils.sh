@@ -191,7 +191,7 @@ policy_load_authnk8s(){
 			kubectl -n $NAMESPACE exec $pod -c $container -i -t -- conjur policy load --as-group security_admin /root/authnk8s/conjur.yml
 			printf "Policies Loaded\n"
 			printf "Setting variable value for test-app-db."
-			kubectl -n $NAMESPACE exec $pod -c $container -i -t -- conjur variable values add test-app-db/password $(opensll rand -hex 12)
+			kubectl -n $NAMESPACE exec $pod -c $container -i -t -- conjur variable values add test-app-db/password $(openssl rand -hex 12)
 		done
 	done
 }
