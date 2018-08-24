@@ -99,6 +99,8 @@ spec:
             value: https://conjur-authnk8s.cyberark-conjur-enterprise.svc.cluster.local/api/authn-k8s/prod
           - name: CONJUR_ACCOUNT
             value: cyberark
+          - name: CONJUR_VERSION
+            value: '4'
           - name: CONJUR_AUTHN_LOGIN
             value: k8s-app/*/*
           - name: CONJUR_SSL_CERTIFICATE
